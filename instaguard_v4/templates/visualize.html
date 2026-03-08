@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:.3rem">📊 Dataset Visualization</h2>
+  <p style="font-size:.88rem;color:var(--t2);margin-bottom:1.5rem">Visual analysis of the Kaviya Instagram Fake Account Dataset used to train our models.</p>
+
+  <!-- Stats cards -->
+  <div class="grid3" style="margin-bottom:2rem">
+    <div class="card" style="text-align:center">
+      <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#a78bfa">{{stats.total}}</div>
+      <div style="font-size:.72rem;color:var(--t3);text-transform:uppercase;margin-top:.2rem">Total Samples</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#34d399">{{stats.real}}</div>
+      <div style="font-size:.72rem;color:var(--t3);text-transform:uppercase;margin-top:.2rem">Real Accounts</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#fca5a5">{{stats.fake}}</div>
+      <div style="font-size:.72rem;color:var(--t3);text-transform:uppercase;margin-top:.2rem">Fake Accounts</div>
+    </div>
+  </div>
+
+  <!-- Chart grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:1.5rem">
+    {% for title, fname in plots %}
+    <div class="card">
+      <div style="font-size:.85rem;font-weight:700;color:var(--p2);margin-bottom:1rem">{{title}}</div>
+      <img src="/static/plots/{{fname}}" alt="{{title}}" style="width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy" onerror="this.parentElement.style.display='none'"/>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Dataset info -->
+  <div class="card" style="margin-top:2rem">
+    <div style="font-size:.88rem;font-weight:700;margin-bottom:1rem">📋 Dataset Details</div>
+    <table class="tbl">
+      <tr><th>Field</th><th>Value</th></tr>
+      <tr><td>Dataset Name</td><td>Kaviya Instagram Fake Account Dataset</td></tr>
+      <tr><td>Source</td><td>Kaggle</td></tr>
+      <tr><td>Total Records</td><td>{{stats.total}} (balanced — 50% real, 50% fake)</td></tr>
+      <tr><td>Features</td><td>{{stats.features}} profile attributes</td></tr>
+      <tr><td>Target</td><td>fake (0 = Real, 1 = Fake)</td></tr>
+      <tr><td>Train/Test Split</td><td>80% training / 20% testing</td></tr>
+    </table>
+  </div>
+</div>
+{% endblock %}

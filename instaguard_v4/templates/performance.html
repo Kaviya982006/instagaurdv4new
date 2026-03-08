@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page">
+  <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:.3rem">🏆 Model Performance</h2>
+  <p style="font-size:.88rem;color:var(--t2);margin-bottom:1.8rem">Accuracy comparison of all 5 trained ML algorithms on the Kaviya test dataset (115 samples).</p>
+
+  <!-- Accuracy visual bars -->
+  <div class="card" style="margin-bottom:1.5rem">
+    <div style="font-size:.85rem;font-weight:700;margin-bottom:1.2rem">Algorithm Accuracy Comparison</div>
+    {% for r in rows %}
+    {% set pct = r.Accuracy.replace('%','') | float %}
+    {% set color = '#10b981' if pct >= 94 else ('#a78bfa' if pct >= 90 else '#9ca3af') %}
+    <div style="margin-bottom:1rem">
+      <div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.35rem">
+        <span style="font-weight:{% if pct >= 94 %}700{% else %}500{% endif %};color:{% if pct >= 94 %}#f0f0ff{% else %}var(--t2){% endif %}">
+          {{r.Algorithm}}{% if pct >= 94 %} ⭐{% endif %}
+        </span>
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:{{color}}">{{r.Accuracy}}</span>
+      </div>
+      <div style="height:10px;border-radius:50px;background:rgba(255,255,255,.06);overflow:hidden">
+        <div style="height:100%;width:{{pct}}%;border-radius:50px;background:{{color}};max-width:100%"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Full metrics table -->
+  <div class="card">
+    <div style="font-size:.85rem;font-weight:700;margin-bottom:1rem">Detailed Metrics</div>
+    <table class="tbl">
+      <tr><th>Algorithm</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1 Score</th></tr>
+      {% for r in rows %}
+      <tr {% if r.Algorithm == 'XGBoost' %}style="background:rgba(16,185,129,.05)"{% endif %}>
+        <td>{{r.Algorithm}}{% if r.Algorithm == 'XGBoost' %} <span class="badge bg-real">Best</span>{% endif %}</td>
+        <td style="font-family:'JetBrains Mono',monospace">{{r.Accuracy}}</td>
+        <td style="font-family:'JetBrains Mono',monospace">{{r.Precision}}</td>
+        <td style="font-family:'JetBrains Mono',monospace">{{r.Recall}}</td>
+        <td style="font-family:'JetBrains Mono',monospace">{{r.F1}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <!-- Training info -->
+  <div class="grid2" style="margin-top:1.5rem">
+    <div class="card">
+      <div style="font-size:.85rem;font-weight:700;margin-bottom:.75rem">📊 Training Details</div>
+      <table class="tbl">
+        <tr><td>Dataset</td><td>Kaviya Instagram Fake Account</td></tr>
+        <tr><td>Total Samples</td><td>576 (288 real + 288 fake)</td></tr>
+        <tr><td>Train Split</td><td>80% — 461 samples</td></tr>
+        <tr><td>Test Split</td><td>20% — 115 samples</td></tr>
+        <tr><td>Cross-Validation</td><td>5-fold StratifiedKFold</td></tr>
+        <tr><td>Scaler</td><td>StandardScaler</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div style="font-size:.85rem;font-weight:700;margin-bottom:.75rem">🔬 XGBoost Best Config</div>
+      <table class="tbl">
+        <tr><td>n_estimators</td><td>100</td></tr>
+        <tr><td>max_depth</td><td>5</td></tr>
+        <tr><td>learning_rate</td><td>0.1</td></tr>
+        <tr><td>subsample</td><td>0.8</td></tr>
+        <tr><td>colsample_bytree</td><td>0.8</td></tr>
+        <tr><td>Accuracy</td><td><strong style="color:#34d399">94.7%</strong></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Visualization chart -->
+  <div class="card" style="margin-top:1.5rem">
+    <div style="font-size:.85rem;font-weight:700;margin-bottom:1rem">📈 Algorithm Accuracy Chart</div>
+    <img src="/static/plots/algo_accuracy.png" alt="Algorithm Accuracy" style="width:100%;max-width:700px;display:block;margin:0 auto;border-radius:8px;border:1px solid var(--border)"/>
+  </div>
+</div>
+{% endblock %}

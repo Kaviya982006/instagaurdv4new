@@ -1,0 +1,198 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: linear-gradient(135deg, #add8e6, #d8bfd8); /* light blue to light violet */
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between; /* brand left, links right */
+  align-items: center;
+  background: linear-gradient(90deg, #add8e6, #d8bfd8);
+  padding: 12px 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Brand with corner image */
+.navbar .brand {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 22px;
+  color: #fff;
+}
+.navbar .brand img {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Navigation links styled as flex buttons */
+.navbar .links {
+  display: flex;
+  gap: 10px;
+}
+.navbar .links a {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: opacity 0.3s ease, background 0.3s ease;
+}
+.navbar .links a:hover {
+  opacity: 0.7;
+  background: rgba(255,255,255,0.3);
+}
+
+/* Flash messages */
+.flash {
+  padding: 10px;
+  margin: 10px auto;
+  max-width: 600px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+.flash.success {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
+}
+.flash.error {
+  background: #ffebee;
+  color: #b71c1c;
+  border: 1px solid #ffcdd2;
+}
+
+/* Result */
+.result {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+/* Center all main content */
+.container, .form, .grid-form, .result, h2, h3 {
+  text-align: center;
+  margin: auto;
+}
+
+/* Bigger headings */
+h2 {
+  font-size: 28px;
+  margin: 20px 0;
+}
+h3 {
+  font-size: 22px;
+  margin: 15px 0;
+}
+
+/* Prediction result styling */
+.result {
+  margin-top: 20px;
+  font-size: 24px;   /* bigger */
+  font-weight: bold;
+  color: #333;
+  display: block;    /* ensures new line */
+  text-align: center;
+}
+
+/* Scrollable table for accuracy/performance */
+.table-wrap {
+  max-height: 400px;   /* fits window */
+  overflow-y: auto;    /* scroll enabled */
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+/* Resize analysis images */
+.analysis-img {
+  display: block;
+  margin: 20px auto;
+  max-width: 600px;   /* smaller width */
+  height: auto;       /* keep aspect ratio */
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Prediction form layout */
+.grid-form {
+  display: flex;
+  flex-direction: column;   /* stack vertically */
+  align-items: center;      /* center horizontally */
+  gap: 12px;
+  max-width: 500px;
+  margin: 30px auto;
+  background: rgba(255,255,255,0.9);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Labels centered above inputs */
+.grid-form label {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+/* Input boxes smaller, centered */
+.grid-form input,
+.grid-form select {
+  width: 60%;               /* not full width */
+  max-width: 250px;         /* cap size */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
+}
+
+/* Predict button */
+.grid-form button {
+  width: auto;
+  padding: 10px 20px;
+  background: linear-gradient(90deg, #add8e6, #d8bfd8);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+.grid-form button:hover {
+  opacity: 0.7;
+}
+/* Accuracy table styling */
+.table-wrap {
+  display: flex;
+  justify-content: center;   /* center horizontally */
+  margin: 20px auto;
+  max-width: 90%;            /* keep it within window */
+  overflow-x: auto;          /* allow horizontal scroll if needed */
+  background: #fff;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.table-wrap table {
+  margin: 0 auto;            /* center table inside */
+  border-collapse: collapse;
+  width: auto;               /* shrink to fit content */
+}
+
+.table-wrap th, .table-wrap td {
+  padding: 8px 12px;
+  text-align: center;
+  border: 1px solid #ccc;
+}

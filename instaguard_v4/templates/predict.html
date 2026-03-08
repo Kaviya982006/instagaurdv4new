@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.risk-banner-full{border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+.rb-fake{background:rgba(239,68,68,.1);border:2px solid rgba(239,68,68,.35)}
+.rb-real{background:rgba(16,185,129,.08);border:2px solid rgba(16,185,129,.25)}
+.gauge-big svg{overflow:visible}
+.conf-bar{height:10px;border-radius:50px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:.8rem}
+.conf-fill{height:100%;border-radius:50px}
+.cf-real{background:linear-gradient(90deg,#10b981,#059669)}
+.cf-fake{background:linear-gradient(90deg,#ef4444,#dc2626)}
+.insight-item{display:flex;gap:.6rem;align-items:flex-start;padding:.7rem .9rem;
+  background:rgba(255,255,255,.03);border-radius:10px;font-size:.84rem;color:var(--t2);border:1px solid var(--border)}
+</style>
+<div class="page">
+  <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:.3rem">🔍 Manual Prediction</h2>
+  <p style="font-size:.88rem;color:var(--t2);margin-bottom:1.8rem">Enter profile details manually — works for private accounts and when auto-fetch is unavailable.</p>
+
+  <div class="card">
+    <form method="post">
+      <div style="margin-bottom:1.2rem">
+        <label class="lbl">Instagram Username</label>
+        <input class="input" name="username" type="text" placeholder="@username (for display only)" value="{{result.username if result else ''}}"/>
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <label class="lbl">Choose Algorithm</label>
+        <select class="input" name="algorithm">
+          {% for a in algorithms %}<option>{{a}}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div style="font-size:.88rem;font-weight:700;color:var(--p2);margin-bottom:1rem">Profile Information</div>
+      <div class="form-grid" style="margin-bottom:1.5rem">
+        <div>
+          <label class="lbl">Has Profile Picture?</label>
+          <select class="input" name="profile_pic">
+            <option value="1">Yes</option><option value="0">No</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Account Type</label>
+          <select class="input" name="private">
+            <option value="0">Public</option><option value="1">Private</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl"># Followers</label>
+          <input class="input" name="followers" type="number" min="0" placeholder="e.g. 250" value="{{result.followers if result else ''}}"/>
+        </div>
+        <div>
+          <label class="lbl"># Following</label>
+          <input class="input" name="follows" type="number" min="0" placeholder="e.g. 180" value="{{result.follows if result else ''}}"/>
+        </div>
+        <div>
+          <label class="lbl"># Posts</label>
+          <input class="input" name="posts" type="number" min="0" placeholder="e.g. 45" value="{{result.posts if result else ''}}"/>
+        </div>
+        <div>
+          <label class="lbl">Bio Description Length (chars)</label>
+          <input class="input" name="desc_length" type="number" min="0" placeholder="e.g. 80" value="0"/>
+        </div>
+        <div>
+          <label class="lbl">Digit Ratio in Username (0–1)</label>
+          <input class="input" name="nums_username" type="number" step="0.01" min="0" max="1" placeholder="e.g. 0.25" value="0"/>
+        </div>
+        <div>
+          <label class="lbl">Words in Full Name</label>
+          <input class="input" name="fullname_words" type="number" min="0" placeholder="e.g. 2" value="0"/>
+        </div>
+        <div>
+          <label class="lbl">Digit Ratio in Full Name (0–1)</label>
+          <input class="input" name="nums_fullname" type="number" step="0.01" min="0" max="1" placeholder="e.g. 0.0" value="0"/>
+        </div>
+        <div>
+          <label class="lbl">Name Equals Username?</label>
+          <select class="input" name="name_eq_username">
+            <option value="0">No</option><option value="1">Yes</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">External URL in Bio?</label>
+          <select class="input" name="ext_url">
+            <option value="0">No</option><option value="1">Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:.8rem">Predict Account →</button>
+    </form>
+  </div>
+
+  {% if result %}
+  <div style="margin-top:2rem">
+    <!-- Risk Banner -->
+    <div class="risk-banner-full {{' rb-fake' if result.is_fake else ' rb-real'}}">
+      <span style="font-size:2rem">{{result.risk_icon}}</span>
+      <div>
+        <div style="font-size:1.1rem;font-weight:800">
+          {{'⚠️ FAKE ACCOUNT' if result.is_fake else '✅ AUTHENTIC ACCOUNT'}}
+        </div>
+        <div style="font-size:.8rem;color:var(--t2);margin-top:.2rem">@{{result.username}} · {{result.algorithm}}</div>
+      </div>
+      <span class="badge {{'bg-fake' if result.is_fake else 'bg-real'}}" style="margin-left:auto">{{result.risk}} RISK</span>
+    </div>
+
+    <div class="grid2" style="margin-bottom:1.5rem">
+      <!-- Score -->
+      <div class="card">
+        <div style="font-size:.78rem;font-weight:700;color:var(--t2);margin-bottom:1rem">AUTHENTICITY SCORE</div>
+        <div class="gauge-big" style="text-align:center">
+          {% set color = '#ef4444' if result.auth_score < 4 else ('#f97316' if result.auth_score < 7 else '#10b981') %}
+          <svg width="160" height="95" viewBox="0 0 160 95">
+            <path d="M20 85 A70 70 0 0 1 140 85" fill="none" stroke="#1e1e45" stroke-width="12" stroke-linecap="round"/>
+            <path d="M20 85 A70 70 0 0 1 140 85" fill="none" stroke="{{color}}" stroke-width="12"
+              stroke-linecap="round"
+              stroke-dasharray="{{3.14159*70}}"
+              stroke-dashoffset="{{3.14159*70*(1-result.auth_score/10)}}"/>
+            <text x="80" y="80" text-anchor="middle" fill="{{color}}" font-size="28" font-weight="800" font-family="JetBrains Mono">{{result.auth_score}}</text>
+            <text x="80" y="94" text-anchor="middle" fill="#6b7280" font-size="10">out of 10</text>
+          </svg>
+        </div>
+      </div>
+      <!-- Confidence -->
+      <div class="card">
+        <div style="font-size:.78rem;font-weight:700;color:var(--t2);margin-bottom:1rem">CONFIDENCE BREAKDOWN</div>
+        <div style="margin-bottom:.3rem;font-size:.82rem;display:flex;justify-content:space-between"><span style="color:#34d399">✅ Real Account</span><span style="font-family:'JetBrains Mono',monospace;color:#34d399">{{result.prob_real}}%</span></div>
+        <div class="conf-bar"><div class="conf-fill cf-real" style="width:{{result.prob_real}}%"></div></div>
+        <div style="margin-bottom:.3rem;font-size:.82rem;display:flex;justify-content:space-between"><span style="color:#fca5a5">⚠️ Fake Account</span><span style="font-family:'JetBrains Mono',monospace;color:#fca5a5">{{result.prob_fake}}%</span></div>
+        <div class="conf-bar"><div class="conf-fill cf-fake" style="width:{{result.prob_fake}}%"></div></div>
+        <div style="margin-top:1rem;padding:.7rem;background:rgba(255,255,255,.03);border-radius:8px;font-size:.78rem;color:var(--t2)">
+          Algorithm: <strong style="color:var(--p2)">{{result.algorithm}}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights -->
+    {% if result.insights %}
+    <div class="card" style="margin-bottom:1.5rem">
+      <div style="font-size:.88rem;font-weight:700;margin-bottom:1rem">💡 AI Insights</div>
+      <div style="display:flex;flex-direction:column;gap:.6rem">
+        {% for i in result.insights %}
+        <div class="insight-item"><span style="font-size:1.1rem;flex-shrink:0">{{i.icon}}</span><span>{{i.text}}</span></div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Report links -->
+    {% if result.is_fake %}
+    <div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.25)">
+      <div style="font-size:.88rem;font-weight:700;color:#fca5a5;margin-bottom:1rem">🚨 Report This Fake Account</div>
+      <div class="grid3">
+        <a href="https://cybercrime.gov.in" target="_blank" class="btn btn-primary" style="text-align:center">🇮🇳 cybercrime.gov.in</a>
+        <a href="tel:1930" class="btn" style="background:rgba(249,115,22,.2);color:#fdba74;border:1px solid rgba(249,115,22,.3);text-align:center">📞 1930 Helpline</a>
+        <a href="https://help.instagram.com" target="_blank" class="btn btn-ghost" style="text-align:center">📱 Instagram Report</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

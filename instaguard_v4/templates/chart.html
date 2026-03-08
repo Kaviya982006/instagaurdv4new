@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Accuracy Chart</h2>
+
+<img class="analysis-img" src="{{ url_for('static', filename='accuracy_bar.png') }}" alt="Accuracy Bar Chart">
+{% endblock %}

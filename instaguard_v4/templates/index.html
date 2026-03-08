@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.hero-wrap{position:relative;z-index:1;text-align:center;padding:3rem 1.5rem 2rem;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(124,58,237,.15),transparent)}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;background:rgba(124,58,237,.1);
+  border:1px solid rgba(124,58,237,.25);border-radius:50px;padding:.35rem 1.1rem;
+  font-size:.7rem;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.5rem}
+.pulse{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;line-height:1.15;margin-bottom:.7rem}
+.hero-title .ig{color:#e84393}.hero-title .g{color:#7c3aed}
+.hero-sub{font-size:.9rem;color:var(--t2);max-width:500px;margin:0 auto 2rem;line-height:1.8}
+
+/* TWO MODE CARDS */
+.modes-wrap{max-width:900px;margin:0 auto 2rem;padding:0 1.5rem;position:relative;z-index:1}
+.modes-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+@media(max-width:640px){.modes-grid{grid-template-columns:1fr}}
+
+.mode-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1.5rem;
+  transition:border-color .2s}
+.mode-card:hover{border-color:rgba(124,58,237,.4)}
+
+.mode-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .8rem;
+  border-radius:50px;font-size:.65rem;font-weight:700;margin-bottom:.9rem;border:1px solid}
+.mb-auto{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25);color:#34d399}
+.mb-manual{background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.25);color:#a78bfa}
+
+.mode-title{font-size:.95rem;font-weight:800;margin-bottom:.25rem}
+.mode-desc{font-size:.75rem;color:var(--t3);margin-bottom:1rem;line-height:1.6}
+
+/* Shared input styles */
+.at-wrap{position:relative}
+.at-prefix{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);
+  color:var(--t3);font-size:.9rem;font-weight:700;pointer-events:none}
+.search-input{width:100%;padding:.7rem .7rem .7rem 2.2rem;background:rgba(255,255,255,.06);
+  border:1px solid var(--border);border-radius:10px;color:var(--t1);font-family:'Sora',sans-serif;
+  font-size:.88rem;outline:none;transition:border-color .2s;margin-bottom:.6rem}
+.search-input:focus{border-color:var(--p1);background:rgba(124,58,237,.06)}
+.search-input::placeholder{color:var(--t3)}
+.algo-sel{width:100%;padding:.7rem 1rem;background:rgba(255,255,255,.06);border:1px solid var(--border);
+  border-radius:10px;color:var(--t2);font-family:'Sora',sans-serif;font-size:.82rem;
+  outline:none;margin-bottom:.75rem}
+.algo-sel option{background:#131332}
+
+.analyze-btn{width:100%;padding:.75rem;background:linear-gradient(135deg,#7c3aed,#e84393);
+  color:#fff;border:none;border-radius:10px;font-size:.88rem;font-weight:700;
+  cursor:pointer;font-family:'Sora',sans-serif;transition:opacity .2s}
+.analyze-btn:hover{opacity:.88}
+.manual-btn{width:100%;padding:.75rem;background:linear-gradient(135deg,#1e40af,#7c3aed);
+  color:#fff;border:none;border-radius:10px;font-size:.88rem;font-weight:700;
+  cursor:pointer;font-family:'Sora',sans-serif;transition:opacity .2s}
+.manual-btn:hover{opacity:.88}
+
+.status-bar{margin-top:.6rem;min-height:24px;display:flex;align-items:center;
+  justify-content:center;gap:.5rem;font-size:.78rem}
+.spin{width:13px;height:13px;border:2px solid rgba(124,58,237,.3);border-top-color:#7c3aed;
+  border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* divider */
+.or-divider{display:flex;align-items:center;gap:.75rem;margin:0 0 1.2rem;
+  font-size:.72rem;color:var(--t3)}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Manual mini form */
+.mini-form{display:flex;flex-direction:column;gap:.5rem}
+.mini-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.mini-label{font-size:.68rem;font-weight:600;color:var(--t3);margin-bottom:.2rem;display:block}
+.mini-input{width:100%;padding:.55rem .7rem;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);border-radius:8px;color:var(--t1);font-family:'Sora',sans-serif;
+  font-size:.78rem;outline:none;transition:border-color .2s}
+.mini-input:focus{border-color:var(--p1)}
+.mini-sel{width:100%;padding:.55rem .7rem;background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:8px;color:var(--t2);font-family:'Sora',sans-serif;font-size:.78rem;outline:none}
+.mini-sel option{background:#131332}
+
+/* Result area */
+#result-area{max-width:900px;margin:0 auto;padding:0 1.5rem 2rem;position:relative;z-index:1;display:none}
+.res-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.5rem;margin-bottom:1rem}
+.risk-banner{border-radius:12px;padding:.85rem 1.2rem;display:flex;align-items:center;
+  gap:.75rem;font-weight:700;font-size:.9rem;margin-bottom:1.2rem}
+.rb-fake{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+.rb-real{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);color:#6ee7b7}
+.profile-row{display:flex;gap:1.2rem;align-items:flex-start;margin-bottom:1.2rem}
+.avatar-ring{width:64px;height:64px;border-radius:50%;padding:3px;flex-shrink:0;
+  background:linear-gradient(135deg,#7c3aed,#e84393)}
+.avatar-ring img,.avatar-ring .av-fallback{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.av-fallback{background:#1e1e45;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.profile-info h3{font-size:.95rem;font-weight:700;margin-bottom:.2rem}
+.profile-handle{font-size:.75rem;color:var(--t3);margin-bottom:.4rem}
+.profile-stats{display:flex;gap:1rem;flex-wrap:wrap}
+.pst-n{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;color:#a78bfa}
+.pst-l{font-size:.6rem;color:var(--t3);text-transform:uppercase}
+.score-row{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem}
+.conf-section{flex:1;min-width:180px}
+.conf-label{font-size:.75rem;color:var(--t2);margin-bottom:.3rem;display:flex;justify-content:space-between}
+.conf-bar{height:8px;border-radius:50px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:.6rem}
+.conf-fill{height:100%;border-radius:50px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.cf-real{background:linear-gradient(90deg,#10b981,#059669)}
+.cf-fake{background:linear-gradient(90deg,#ef4444,#dc2626)}
+.insights-list{display:flex;flex-direction:column;gap:.45rem}
+.insight-item{display:flex;gap:.6rem;align-items:flex-start;padding:.55rem .75rem;
+  background:rgba(255,255,255,.03);border-radius:8px;font-size:.8rem;color:var(--t2)}
+
+/* Stats bar */
+.stats-bar{display:flex;flex-wrap:wrap;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--s1)}
+.stat{flex:1;min-width:100px;padding:1.1rem;text-align:center;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-n{font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace;
+  background:linear-gradient(135deg,#7c3aed,#e84393);-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text}
+.stat-l{font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-top:.15rem}
+
+/* Popup */
+#cyber-popup{position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:rgba(7,7,26,.97);backdrop-filter:blur(20px);border-top:1px solid rgba(239,68,68,.3);
+  padding:1.3rem;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1)}
+#cyber-popup.show{transform:translateY(0)}
+.popup-btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.65rem}
+.popup-btn{display:flex;align-items:center;gap:.65rem;padding:.85rem 1rem;
+  border-radius:11px;text-decoration:none;border:1px solid;transition:all .2s;cursor:pointer}
+.pb-cybercrime{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#fca5a5}
+.pb-police{background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.3);color:#fdba74}
+.pb-insta{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.3);color:#a78bfa}
+.pb-icon{font-size:1.4rem;flex-shrink:0}
+.pb-title{font-size:.8rem;font-weight:700}
+.pb-sub{font-size:.68rem;opacity:.7;margin-top:.1rem}
+.dismiss-btn{display:block;width:100%;margin-top:.75rem;padding:.6rem;background:rgba(255,255,255,.04);
+  border:1px solid var(--border);border-radius:9px;color:var(--t2);font-size:.78rem;
+  cursor:pointer;font-family:'Sora',sans-serif}
+</style>
+
+<canvas id="particles"></canvas>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <div class="eyebrow"><span class="pulse"></span>AI-Powered · 5 ML Algorithms · 11 Features · India Cybercrime Ready</div>
+  <h1 class="hero-title">Detect Fake <span class="ig">Insta</span><span class="g">gram</span> Accounts</h1>
+  <p class="hero-sub">Choose Auto-Fetch for public accounts or Manual Entry for private/any account. Both use the same AI engine.</p>
+</div>
+
+<!-- TWO MODE CARDS -->
+<div class="modes-wrap">
+  <div class="modes-grid">
+
+    <!-- MODE 1: AUTO FETCH -->
+    <div class="mode-card">
+      <div class="mode-badge mb-auto">🤖 Auto-Fetch Mode</div>
+      <div class="mode-title">Enter Username</div>
+      <div class="mode-desc">Fetches real Instagram data automatically. Works best for <strong>public accounts</strong> on local/home network.</div>
+
+      <div class="at-wrap">
+        <span class="at-prefix">@</span>
+        <input class="search-input" id="unInput" type="text" placeholder="instagram_username" autocomplete="off"/>
+      </div>
+      <select class="algo-sel" id="algoSel">
+        {% for a in algorithms %}<option>{{a}}</option>{% endfor %}
+      </select>
+      <button class="analyze-btn" onclick="doAnalyze()">🔍 Analyze Account →</button>
+      <div class="status-bar" id="statusBar"></div>
+    </div>
+
+    <!-- MODE 2: MANUAL ENTRY -->
+    <div class="mode-card">
+      <div class="mode-badge mb-manual">✍️ Manual Entry Mode</div>
+      <div class="mode-title">Enter Profile Details</div>
+      <div class="mode-desc">Works for <strong>all accounts</strong> including private ones. Enter the details from Instagram manually.</div>
+
+      <form method="POST" action="/predict">
+        <select class="mini-sel" name="algorithm" style="margin-bottom:.6rem">
+          {% for a in algorithms %}<option>{{a}}</option>{% endfor %}
+        </select>
+
+        <div class="mini-row">
+          <div>
+            <label class="mini-label">Followers</label>
+            <input class="mini-input" name="followers" type="number" min="0" placeholder="e.g. 250" required/>
+          </div>
+          <div>
+            <label class="mini-label">Following</label>
+            <input class="mini-input" name="follows" type="number" min="0" placeholder="e.g. 980" required/>
+          </div>
+        </div>
+        <div class="mini-row">
+          <div>
+            <label class="mini-label"># Posts</label>
+            <input class="mini-input" name="posts" type="number" min="0" placeholder="e.g. 12" required/>
+          </div>
+          <div>
+            <label class="mini-label">Bio Length (chars)</label>
+            <input class="mini-input" name="desc_length" type="number" min="0" placeholder="e.g. 80" required/>
+          </div>
+        </div>
+        <div class="mini-row">
+          <div>
+            <label class="mini-label">Has Profile Pic?</label>
+            <select class="mini-sel" name="profile_pic">
+              <option value="1">Yes</option><option value="0">No</option>
+            </select>
+          </div>
+          <div>
+            <label class="mini-label">Account Type</label>
+            <select class="mini-sel" name="private">
+              <option value="0">Public</option><option value="1">Private</option>
+            </select>
+          </div>
+        </div>
+        <div class="mini-row" style="margin-top:.3rem">
+          <div>
+            <label class="mini-label">Digit Ratio Username</label>
+            <input class="mini-input" name="nums_username" type="number" step="0.01" min="0" max="1" value="0" placeholder="0.25"/>
+          </div>
+          <div>
+            <label class="mini-label">Words in Full Name</label>
+            <input class="mini-input" name="fullname_words" type="number" min="0" value="0" placeholder="2"/>
+          </div>
+        </div>
+        <!-- Hidden fields with defaults -->
+        <input type="hidden" name="nums_fullname" value="0"/>
+        <input type="hidden" name="name_eq_username" value="0"/>
+        <input type="hidden" name="ext_url" value="0"/>
+        <input type="hidden" name="username" value="manual_entry"/>
+        <button type="submit" class="manual-btn" style="margin-top:.75rem">🧠 Predict Now →</button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- Note about server -->
+  <div style="text-align:center;margin-top:1rem;font-size:.75rem;color:var(--t3);
+    background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);
+    border-radius:10px;padding:.65rem 1rem">
+    💡 <strong style="color:#fcd34d">Tip:</strong> If Auto-Fetch doesn't work (server IP blocked by Instagram), use <strong style="color:#a78bfa">Manual Entry</strong> — it always works and gives the same accurate result.
+  </div>
+</div>
+
+<!-- RESULT AREA -->
+<div id="result-area"></div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat"><div class="stat-n">94.7%</div><div class="stat-l">XGBoost Accuracy</div></div>
+  <div class="stat"><div class="stat-n">576</div><div class="stat-l">Training Samples</div></div>
+  <div class="stat"><div class="stat-n">11</div><div class="stat-l">Profile Features</div></div>
+  <div class="stat"><div class="stat-n">5</div><div class="stat-l">ML Algorithms</div></div>
+  <div class="stat"><div class="stat-n">0₹</div><div class="stat-l">Cost to Use</div></div>
+</div>
+
+<!-- CYBER POPUP -->
+<div id="cyber-popup">
+  <div style="max-width:750px;margin:0 auto">
+    <div style="background:linear-gradient(135deg,#7f1d1d,#991b1b);border-radius:12px;
+      padding:.9rem 1.2rem;margin-bottom:.9rem;text-align:center">
+      <div style="font-size:1rem;font-weight:800;color:#fca5a5;margin-bottom:.2rem">🚨 Fake Account Detected!</div>
+      <div style="font-size:.75rem;color:#fca5a5;opacity:.8">This account shows strong indicators of being fake. Report it now.</div>
+    </div>
+    <div class="popup-btns">
+      <a class="popup-btn pb-cybercrime" href="https://cybercrime.gov.in" target="_blank">
+        <div class="pb-icon">🇮🇳</div>
+        <div><div class="pb-title">National Cyber Crime Portal</div><div class="pb-sub">cybercrime.gov.in</div></div>
+      </a>
+      <a class="popup-btn pb-police" href="tel:1930">
+        <div class="pb-icon">🛡️</div>
+        <div><div class="pb-title">Cyber Crime Helpline</div><div class="pb-sub">Call 1930</div></div>
+      </a>
+      <a class="popup-btn pb-insta" id="popupInstaLink" href="https://help.instagram.com" target="_blank">
+        <div class="pb-icon">📱</div>
+        <div><div class="pb-title">Report on Instagram</div><div class="pb-sub">Instagram Safety Centre</div></div>
+      </a>
+    </div>
+    <button class="dismiss-btn" onclick="document.getElementById('cyber-popup').classList.remove('show')">View Full Analysis ↓</button>
+  </div>
+</div>
+
+<script>
+// Particles
+(function(){
+  const c=document.getElementById('particles'),ctx=c.getContext('2d');
+  const resize=()=>{c.width=window.innerWidth;c.height=window.innerHeight};
+  resize();window.addEventListener('resize',resize);
+  const COLS=['#7c3aed','#a78bfa','#e84393','#f472b6','#06b6d4'];
+  const gems=Array.from({length:35},()=>({
+    x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,
+    s:2+Math.random()*4,vy:-.3-Math.random()*.4,vx:(Math.random()-.5)*.3,
+    color:COLS[Math.floor(Math.random()*COLS.length)],alpha:.3+Math.random()*.4,
+    rot:Math.random()*Math.PI*2,rv:(Math.random()-.5)*.02
+  }));
+  function drawGem(x,y,s,rot,color,alpha){
+    ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.globalAlpha=alpha;
+    ctx.beginPath();ctx.moveTo(0,-s*1.5);ctx.lineTo(s,0);ctx.lineTo(0,s);ctx.lineTo(-s,0);ctx.closePath();
+    ctx.fillStyle=color;ctx.shadowBlur=6;ctx.shadowColor=color;ctx.fill();ctx.restore();
+  }
+  function anim(){
+    ctx.clearRect(0,0,c.width,c.height);
+    gems.forEach(g=>{
+      g.x+=g.vx;g.y+=g.vy;g.rot+=g.rv;
+      if(g.y<-20){g.y=c.height+10;g.x=Math.random()*c.width;}
+      if(g.x<-20)g.x=c.width+10;if(g.x>c.width+20)g.x=-10;
+      drawGem(g.x,g.y,g.s,g.rot,g.color,g.alpha);
+    });requestAnimationFrame(anim);
+  }anim();
+})();
+
+// Auto-fetch analyze
+function doAnalyze(){
+  const un=document.getElementById('unInput').value.trim().replace('@','');
+  const algo=document.getElementById('algoSel').value;
+  if(!un){setStatus('<span style="color:#fca5a5">Please enter a username</span>');return;}
+  setStatus('<span class="spin"></span><span style="color:var(--t2)"> Fetching Instagram data…</span>');
+  fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username:un,algorithm:algo})})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){setStatus('');renderResult(d);}
+    else{
+      setStatus('<span style="color:#fbbf24;font-size:.78rem">⚠️ Auto-fetch blocked by Instagram on this server. Please use <strong>Manual Entry</strong> on the right →</span>');
+    }
+  }).catch(()=>setStatus('<span style="color:#fca5a5;font-size:.78rem">Connection error. Use Manual Entry →</span>'));
+}
+document.getElementById('unInput').addEventListener('keydown',e=>{if(e.key==='Enter')doAnalyze();});
+
+function setStatus(html){document.getElementById('statusBar').innerHTML=html;}
+function fmt(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n;}
+
+function renderResult(d){
+  const isFake=d.is_fake;
+  const score=d.auth_score;
+  const color=score<4?'#ef4444':score<7?'#f97316':'#10b981';
+  let insightsHTML='';
+  (d.insights||[]).forEach(i=>{insightsHTML+=`<div class="insight-item"><span style="font-size:1rem;flex-shrink:0">${i.icon}</span><span>${i.text}</span></div>`;});
+  let picHTML=d.pic_url?`<img src="${d.pic_url}" alt="" onerror="this.style.display='none'">`:'';
+  const html=`
+  <div class="res-card">
+    <div class="risk-banner ${isFake?'rb-fake':'rb-real'}">
+      <span style="font-size:1.2rem">${isFake?'🔴':'🟢'}</span>
+      <div>
+        <div>${isFake?'⚠️ FAKE ACCOUNT DETECTED':'✅ AUTHENTIC ACCOUNT'}</div>
+        <div style="font-size:.72rem;opacity:.8;margin-top:.15rem">@${d.username} · ${d.algorithm} · ${d.fetch_time}s</div>
+      </div>
+      <span class="badge ${isFake?'bg-fake':'bg-real'}" style="margin-left:auto">${d.risk}</span>
+    </div>
+    <div class="profile-row">
+      <div class="avatar-ring">
+        ${picHTML}<div class="av-fallback" style="${d.pic_url?'display:none':''}">👤</div>
+      </div>
+      <div class="profile-info">
+        <h3>${d.fullname||d.username}</h3>
+        <div class="profile-handle">@${d.username} ${d.is_private?'<span class="badge bg-purple">🔒 Private</span>':''}</div>
+        <div class="profile-stats">
+          <div><div class="pst-n">${fmt(d.followers)}</div><div class="pst-l">Followers</div></div>
+          <div><div class="pst-n">${fmt(d.follows)}</div><div class="pst-l">Following</div></div>
+          <div><div class="pst-n">${fmt(d.posts)}</div><div class="pst-l">Posts</div></div>
+        </div>
+        ${d.bio?`<div style="font-size:.72rem;color:var(--t3);margin-top:.35rem">${d.bio.substring(0,90)}</div>`:''}
+      </div>
+    </div>
+    <div class="score-row">
+      <div style="text-align:center;flex-shrink:0">
+        <svg width="130" height="80" viewBox="0 0 130 80" style="overflow:visible">
+          <path d="M18 75 A55 55 0 0 1 112 75" fill="none" stroke="#1e1e45" stroke-width="11" stroke-linecap="round"/>
+          <path d="M18 75 A55 55 0 0 1 112 75" fill="none" stroke="${color}" stroke-width="11"
+            stroke-linecap="round" stroke-dasharray="${Math.PI*55}"
+            stroke-dashoffset="${Math.PI*55*(1-score/10)}" style="transition:stroke-dashoffset 1.2s ease"/>
+          <text x="65" y="70" text-anchor="middle" fill="${color}" font-size="22" font-weight="800" font-family="JetBrains Mono">${score}</text>
+          <text x="65" y="82" text-anchor="middle" fill="#6b7280" font-size="8">/10 Authenticity</text>
+        </svg>
+      </div>
+      <div class="conf-section">
+        <div class="conf-label"><span>✅ Real</span><span>${d.prob_real}%</span></div>
+        <div class="conf-bar"><div class="conf-fill cf-real" style="width:${d.prob_real}%"></div></div>
+        <div class="conf-label"><span>⚠️ Fake</span><span>${d.prob_fake}%</span></div>
+        <div class="conf-bar"><div class="conf-fill cf-fake" style="width:${d.prob_fake}%"></div></div>
+      </div>
+    </div>
+    ${insightsHTML?`<div><div style="font-size:.75rem;font-weight:700;color:var(--t2);margin-bottom:.45rem">💡 AI Insights</div><div class="insights-list">${insightsHTML}</div></div>`:''}
+  </div>
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center">
+    ${isFake?`<a href="https://cybercrime.gov.in" target="_blank" class="btn btn-primary" style="font-size:.8rem">🇮🇳 Report to Cybercrime.gov.in</a>`:''}
+    <a href="/" class="btn btn-ghost" style="font-size:.8rem">🔍 Check Another Account</a>
+  </div>`;
+  const area=document.getElementById('result-area');
+  area.innerHTML=html;area.style.display='block';
+  if(isFake){
+    document.getElementById('popupInstaLink').href=`https://www.instagram.com/${d.username}/`;
+    setTimeout(()=>document.getElementById('cyber-popup').classList.add('show'),800);
+  }
+  area.scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+{% endblock %}
